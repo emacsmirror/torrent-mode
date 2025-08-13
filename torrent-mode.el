@@ -38,15 +38,17 @@
           (seq-map-indexed
            (lambda (file index)
              (let* ((size (gethash "length" file))
+                    (fileno (1+ index))
                     (name (decode-coding-string
                            (string-join (or (gethash "path" file)
                                             (list (gethash "name" file)))
                                         "/")
                            'utf-8)))
 
-               (list index (vector (propertize (number-to-string index) 'sortval (format "%06d" index))
-                                   (propertize (file-size-human-readable size) 'sortval (format "%016d" size))
-                                   name))))
+               (list fileno
+                     (vector (propertize (number-to-string fileno) 'sortval (format "%06d" fileno))
+                             (propertize (file-size-human-readable size) 'sortval (format "%016d" size))
+                             name))))
            files))
 
     (setq tabulated-list-format (vector `("Idx" 4 ,(funcall sortfun 0) . (:right-align t))
