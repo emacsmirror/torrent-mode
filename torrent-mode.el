@@ -4,7 +4,7 @@
 ;; SPDX-License-Identifier: Unlicense
 
 ;; Author: Sergey Trofimov <sarg@sarg.org.ru>
-;; Version: 0.2
+;; Version: 0.2.1
 ;; URL: https://github.com/sarg/torrent-mode.el
 ;; Package-Requires: ((emacs "26.1") (tablist "1.0") (bencoding "1.0"))
 
@@ -54,6 +54,7 @@
   ;; don't save it incidentally
   (setq torrent-mode--buffer-file-name buffer-file-name
         buffer-file-name nil)
+  (auto-save-mode -1)
   (set-buffer-multibyte nil)
 
   (goto-char (point-min))
@@ -70,7 +71,6 @@
           (seq-map-indexed
            (lambda (file index)
              (let* ((size (gethash "length" file))
-                    (fileno (1+ index))
                     (name (decode-coding-string
                            (string-join (or (gethash "path.utf-8" file)
                                             (gethash "path" file)
@@ -79,8 +79,8 @@
                                         "/")
                            'utf-8)))
 
-               (list fileno
-                     (vector (propertize (number-to-string fileno) 'sortval fileno)
+               (list index
+                     (vector (propertize (number-to-string (1+ index)) 'sortval index)
                              (propertize (file-size-human-readable size) 'sortval size)
                              name))))
            files))
