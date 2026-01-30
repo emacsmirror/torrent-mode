@@ -4,7 +4,7 @@
 ;; SPDX-License-Identifier: Unlicense
 
 ;; Author: Sergey Trofimov <sarg@sarg.org.ru>
-;; Version: 0.2.1
+;; Version: 0.2.2
 ;; URL: https://github.com/sarg/torrent-mode.el
 ;; Package-Requires: ((emacs "26.1") (tablist "1.0") (bencoding "1.0"))
 
@@ -30,8 +30,6 @@
   :type 'boolean
   :group 'torrent)
 
-(defvar-local torrent-mode--buffer-file-name nil)
-
 (defun torrent-mode-download-selected ()
   "Call user-defined function to download selected items."
   (interactive nil torrent-mode)
@@ -42,7 +40,7 @@
                    (or single-mark (= 1 (length marked))))
           (pop marked))
         (apply torrent-mode-download-function
-               torrent-mode--buffer-file-name
+               buffer-file-name
                (mapcar #'car marked)))
     (user-error "Download function not defined")))
 
@@ -52,11 +50,11 @@
   "Major mode for torrent files."
 
   ;; don't save it incidentally
-  (setq torrent-mode--buffer-file-name buffer-file-name
-        buffer-file-name nil)
-  (auto-save-mode -1)
-  (set-buffer-multibyte nil)
+  (add-hook 'after-change-functions
+            (lambda (&rest _) (set-buffer-modified-p nil))
+            nil t)
 
+  (set-buffer-multibyte nil)
   (goto-char (point-min))
   (let* ((bencoding-dictionary-type 'hash-table)
          (data (bencoding-read))
